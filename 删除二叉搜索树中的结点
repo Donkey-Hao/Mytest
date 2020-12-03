@@ -1,0 +1,270 @@
+/*
+  根据先序和中序输入结点创建二叉树，与文件中的创建二叉树一样，只不过变成了整型，空结点都用-1表示；
+  建好搜索树后，输入一个数字，删除小于等于输入的数字的所有结点；
+  然后层次输出，这里层次输入有问题，因为根据老师的要求，输出的时候除了最后一层外的所有空结点都输出-1
+  因此，有一个addnode的函数。
+*/
+
+#include<iostream>
+#include<vector>
+#include<queue>
+using namespace std;
+
+ struct BinNode {
+     BinNode(int n):data(n),lchild(NULL),rchild(NULL){}
+    int data;
+    BinNode* lchild;      BinNode* rchild;
+};
+
+
+int findroot(vector<int> a,vector<int> b){
+    if(a[0]==b[0]) return 0;
+    char fi=a[0];
+    int s=b.size();
+    for(int i=0;i<s;i++){
+        if(b[i]==fi) return i;
+    }
+    return 0;
+}
+BinNode* create(vector<int> a,vector<int> b,int n){
+    if(a.size()==0) return NULL;
+    if(a[0]==b[0]&&n<2){
+        BinNode* ro=new BinNode(a[0]);
+        return ro;
+    }
+    vector<int> als,ars;
+    vector<int> bls,brs;
+    int m=findroot(a,b);
+    BinNode*root=new BinNode(a[0]);
+    BinNode*p=root;
+
+    if(a[0]!=b[0]) bls.push_back(b[0]);
+    int s=a.size();
+    for(int i=1;i<s;++i){
+        if(i<m) {
+            als.push_back(a[i]);
+            bls.push_back(b[i]);
+            }
+
+        if(i==m) als.push_back(a[i]);
+
+        if(i>m) {
+            ars.push_back(a[i]);
+            brs.push_back(b[i]);
+        }
+    }
+    int mk=a.size()-m;
+    BinNode* lp,*rp;
+    lp=create(als,bls,m);
+    rp=create(ars,brs,mk);
+    p->lchild=lp;
+    p->rchild=rp;
+ 
+    return root;
+}
+int level(BinNode* root){//计算树的高度
+    queue<BinNode*> q;
+    q.push(root);
+    q.push(NULL);
+    int count=0;
+    while(!q.empty())  { 
+        
+        if(q.front()->lchild!=NULL)
+        {
+              q.push(q.front()->lchild);
+        }
+       
+        if(q.front()->rchild!=NULL)
+        {
+              q.push(q.front()->rchild);
+        }
+             
+        q.pop();
+        
+        if(q.front()==NULL) {
+            if(q.size()!=1) q.push(NULL);
+            q.pop();
+            count++;
+        }
+    }
+    return count;        
+}
+BinNode* finddad(BinNode* root,int n){
+    queue<BinNode*> q;
+    q.push(root);
+    q.push(NULL);
+    int count=0;
+    while(!q.empty())  { 
+        if(q.front()->lchild!=NULL)
+        {       
+            if(q.front()->lchild->data==n) return q.front();
+            q.push(q.front()->lchild);
+        }
+       
+        if(q.front()->rchild!=NULL)
+        {   
+            if(q.front()->rchild->data==n) return q.front();
+              q.push(q.front()->rchild);
+        }
+             
+        q.pop();
+        if(q.front()==NULL) {
+            if(q.size()!=1) q.push(NULL);
+            q.pop();
+            count++;
+        }
+    }
+    return NULL;        
+}
+BinNode* addnode(BinNode* root){
+    queue<BinNode*> q;
+    q.push(root);
+    q.push(NULL);
+    int count=1;
+    int m=level(root);
+    while(!q.empty()&&count<m-1)  { 
+        
+        if(q.front()->lchild!=NULL)
+        {
+              q.push(q.front()->lchild);
+        }
+        else{
+            BinNode*p=new BinNode(-1);
+            q.front()->lchild=p;
+        }
+       
+        if(q.front()->rchild!=NULL)
+        {
+              q.push(q.front()->rchild);
+        }
+        else{
+            BinNode*p=new BinNode(-1);
+            q.front()->rchild=p;
+        }
+             
+        q.pop();
+        
+        if(q.front()==NULL) {
+            if(q.size()!=1) q.push(NULL);
+            q.pop();
+            count++;
+        }
+    } 
+    return root;       
+}
+
+
+BinNode* deletenode(BinNode* root,int n){
+    if(root==NULL) return NULL;
+    if(n>=root->data) {
+        if(root->rchild) {root=root->rchild;
+        return deletenode(root,n);}
+        else return NULL;}
+    queue<BinNode*> q;
+    q.push(root);
+    q.push(NULL);
+    
+    for(;!q.empty();){ 
+        BinNode* qro=q.front();
+       
+        if(qro->data<=n){
+            BinNode*p;
+            p=finddad(root,qro->data);
+            if(qro->rchild) p->lchild=qro->rchild;
+            else p->lchild=NULL;
+            while(!q.empty()) q.pop();
+            q.push(root);
+            q.push(NULL);
+            continue;
+            cout<<p->data;
+        }
+        if(q.front()->lchild!=NULL)
+        {
+              q.push(q.front()->lchild);
+        }
+        if(q.front()->rchild!=NULL)
+        {
+              q.push(q.front()->rchild);
+        }
+        
+        q.pop();
+        if(q.front()==NULL) {
+            if(q.size()!=1) q.push(NULL);
+            q.pop();
+        }
+    }
+    return root;        
+}
+
+void midprint(BinNode* root){
+    queue<BinNode*> q;
+    q.push(root);
+    q.push(NULL);
+    int m=level(root);
+    int count=0;
+  
+    while(count<m)  { 
+        BinNode* qro=q.front();
+        if(qro) {
+           
+             cout<<qro->data<<" ";
+        }
+        
+        if(q.front()->lchild!=NULL)
+        {
+              q.push(q.front()->lchild);
+        }
+       
+        if(q.front()->rchild!=NULL)
+        {
+              q.push(q.front()->rchild);
+        }
+             
+        q.pop();
+        
+        if(q.front()==NULL) {
+            if(q.size()!=1) q.push(NULL);
+            q.pop();
+            count++;
+            
+        }
+    }
+        
+}
+
+int main(){
+    freopen("input_11_2.txt","r",stdin);
+    freopen("output_11_2.txt","w",stdout);
+
+    int n;
+    int v;
+    vector<int> a,b;
+    while(cin >> v) {
+        a.push_back(v);
+        if (cin.get() == '\n')
+            break;
+    }
+    while(cin >> v) {
+        b.push_back(v);
+        if (cin.get() == '\n')
+            break;
+    }
+    cin>>n;
+    
+    int as,bs;
+    as=a.size();
+    bs=b.size();
+    if(as==0||bs==0) return 0;
+    if(as!=bs) return 0;
+    
+    BinNode* root=create(a,b,as);
+    //midprint(root);
+    root=deletenode(root,n);
+    root=addnode(root);
+    midprint(root);
+
+    return 0;
+
+}
+ 
+
