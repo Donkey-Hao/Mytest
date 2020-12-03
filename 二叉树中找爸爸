@@ -1,0 +1,64 @@
+#include<iostream>
+#include<string>
+#include<stack>
+#include<vector>
+#include<queue>
+
+#define nullptr   NULL;
+using namespace std;
+ struct BinNode {
+    BinNode(int n) :data(n), lchild(NULL), rchild(NULL) {}
+    int data;
+    BinNode* lchild;      BinNode* rchild;
+
+};
+ BinNode* buildTree(vector<int> arr) {
+     if (arr.size() == 0)  return NULL;
+     BinNode* root = new BinNode(arr[0]);
+     queue<BinNode*> q;
+     q.push(root);
+     int i = 1;
+     while (i < arr.size()) {
+         BinNode* node = q.front();
+         q.pop();
+         if (node != NULL) {
+             BinNode* l = (arr[i] != -1) ? new BinNode(arr[i]) : nullptr;
+             BinNode* r = ((i + 1) < arr.size() && arr[i + 1] != -1) ? new BinNode(arr[i + 1]) : nullptr;
+             node->lchild = l;
+             node->rchild = r;
+             q.push(l);
+             q.push(r);
+             i += 2;
+         }
+     }
+     return root;
+ };
+
+BinNode* find_dad(BinNode* root,int x, int y){
+    if (root == NULL) return NULL;
+    if (x == root->data || y == root->data) return root;
+    BinNode* left =find_dad(root->lchild, x, y);
+    BinNode* right = find_dad(root->rchild, x,y);
+    if (left == NULL) return right;
+    else if (right == NULL) return left;
+    else return root;
+}
+
+
+int main() {
+    int v;
+    vector<int> a;
+   // cout << "enter the values one by one(must be >= 0):" << endl;
+    while (cin >> v) {
+        a.push_back(v);
+        if (cin.get() == '\n')
+            break;
+    }
+    BinNode* root = buildTree(a);
+    int x,y;
+    cin>>x>>y;
+    BinNode* ro=find_dad(root,x,y);
+    if(ro) cout<<ro->data;
+    return 0;
+}
+
