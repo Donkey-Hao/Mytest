@@ -1,0 +1,88 @@
+//根据前序和中序输入来创建二叉树：
+#include<iostream>
+#include<string>
+
+using namespace std;
+
+ struct BinNode {
+     BinNode(char n):data(n),lchild(NULL),rchild(NULL){}
+    char data;
+    BinNode* lchild;      BinNode* rchild;
+};
+
+
+int findroot(string a,string b){
+    if(a[0]==b[0]) return 0;
+    char fi=a[0];
+    for(int i=0;i<b.size();i++){
+        if(b[i]==fi) return i;
+    }
+}
+BinNode* create(string a,string b,int n){
+    if(a.size()==0) return NULL;
+    if(a[0]==b[0]&&n<2){
+        BinNode* ro=new BinNode(a[0]);
+        return ro;
+    }
+    string als,ars;
+    string bls,brs;
+    int m=findroot(a,b);
+    BinNode*root=new BinNode(a[0]);
+    BinNode*p=root;
+
+    if(a[0]!=b[0]) bls.push_back(b[0]);
+    for(int i=1;i<a.size();++i){
+        if(i<m) {
+            als.push_back(a[i]);
+            bls.push_back(b[i]);
+            }
+
+        if(i==m) als.push_back(a[i]);
+
+        if(i>m) {
+            ars.push_back(a[i]);
+            brs.push_back(b[i]);
+        }
+    }
+    int mk=a.size()-m;
+    BinNode* lp,*rp;
+    lp=create(als,bls,m);
+    rp=create(ars,brs,mk);
+    p->lchild=lp;
+    p->rchild=rp;
+
+    return root;
+}
+
+int height (BinNode*t) {
+    if (t == NULL ) return 0;    
+    else {
+        int i = height ( t->lchild );
+        int j = height ( t->rchild );
+        return (i<j)?j+1:i+1;
+    }
+}    
+
+int main(){
+   // freopen("input.in","r",stdin);
+    string a,b;
+    int n;
+    cin>>n;  //这里n是输入的结点数量，也是string a，b的长度
+    cin>>a;
+    cin>>b;
+    if(n>50) return 0;
+    int as,bs;
+    as=a.size();
+    bs=b.size();
+    if((as!=bs)||(as!=n)||(bs!=n)) return 0;
+
+    BinNode* root=create(a,b,n);
+    int m;
+    m=height(root);
+    cout<<m;
+
+    return 0;
+
+}
+ 
+
